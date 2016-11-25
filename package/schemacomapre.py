@@ -7,26 +7,33 @@ from psycopg2 import connect
 from optparse import OptionParser
 
 pp = PrettyPrinter(indent=2, width=80)
+version = '1.0.0'
 
 
 def run():
-    version = '1.0.0'
-    parser = OptionParser(version=version)
-    parser.add_option('-u', '--username', help='username for db connection', metavar='USER')
-    parser.add_option('-d', '--database', help='database to use', metavar='DATABASE')
-    parser.add_option('-p', '--password', help='database to use', metavar='PASSWORD')
+    parser = create_parser()
 
     options, args = parser.parse_args()
+    validate_options(options, parser)
 
+    with connect(database=options.database, user=options.username, password=options.password) as conn:
+        with conn.cursor() as cur:
+            save_information(options.database, get_schema_information(cur))
+
+
+def validate_options(options, parser):
     if not options.username:
         parser.error('username is required')
     if not options.database:
         parser.error('database is required')
 
-    with connect(database=options.database, user=options.username, password=options.password) as conn:
-        with conn.cursor() as cur:
-            schema_information = get_schema_information(cur)
-            save_information(options.database, schema_information)
+
+def create_parser():
+    parser = OptionParser(version=version)
+    parser.add_option('-u', '--username', help='username for db connection', metavar='USER')
+    parser.add_option('-d', '--database', help='database to use', metavar='DATABASE')
+    parser.add_option('-p', '--password', help='database to use', metavar='PASSWORD')
+    return parser
 
 
 def save_information(db_name, schema_information):
