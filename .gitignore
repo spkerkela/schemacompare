@@ -1,0 +1,8 @@
+bin/
+dist/
+include/
+lib/
+.Python
+MANIFEST
+pip-selfcheck.json
+schema_info
