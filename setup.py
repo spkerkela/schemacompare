@@ -1,7 +1,7 @@
 from distutils.core import setup
 
 setup(
-  name="SchemaCompare",
+  name="schemacompare",
   version="1.0.0",
   author="Simo-Pekka Kerkelä",
   author_email="simopekka1990@gmail.com",
