@@ -38,12 +38,14 @@ def create_parser():
 
 def save_information(db_name, schema_information):
     with open('schema_info') as db:
-        old_data = db[db_name]
-        if old_data:
-            diff = DeepDiff(old_data, schema_information)
-            if len(diff) > 0:
-                pp.pprint(diff)
-        db[db_name] = schema_information
+        try:
+            old_data = db[db_name]
+            if old_data:
+                diff = DeepDiff(old_data, schema_information)
+                if len(diff) > 0:
+                    pp.pprint(diff)
+        finally:
+            db[db_name] = schema_information
 
 
 def get_schema_information(cur):
