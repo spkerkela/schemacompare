@@ -4,7 +4,7 @@ from shelve import open
 from deepdiff import DeepDiff
 from pprint import PrettyPrinter
 from psycopg2 import connect
-from optparse import OptionParser
+from argparse import ArgumentParser
 
 pp = PrettyPrinter(indent=2, width=80)
 version = '1.0.0'
@@ -13,12 +13,12 @@ version = '1.0.0'
 def run():
     parser = create_parser()
 
-    options, args = parser.parse_args()
-    validate_options(options, parser)
+    args = parser.parse_args()
+    validate_options(args, parser)
 
-    with connect(database=options.database, user=options.username, password=options.password) as conn:
+    with connect(database=args.database, user=args.username, password=args.password) as conn:
         with conn.cursor() as cur:
-            save_information(options.database, get_schema_information(cur))
+            save_information(args.database, get_schema_information(cur), args.save)
 
 
 def validate_options(options, parser):
@@ -29,14 +29,15 @@ def validate_options(options, parser):
 
 
 def create_parser():
-    parser = OptionParser(version=version)
-    parser.add_option('-u', '--username', help='username for db connection', metavar='USER')
-    parser.add_option('-d', '--database', help='database to use', metavar='DATABASE')
-    parser.add_option('-p', '--password', help='database to use', metavar='PASSWORD')
+    parser = ArgumentParser()
+    parser.add_argument('-u', '--username', help='username for db connection', metavar='USER')
+    parser.add_argument('-d', '--database', help='database to use', metavar='DATABASE')
+    parser.add_argument('-p', '--password', help='database to use', metavar='PASSWORD')
+    parser.add_argument('-s', '--save',     help='store current state of database', action='store_true')
     return parser
 
 
-def save_information(db_name, schema_information):
+def save_information(db_name, schema_information, overwrite=False):
     with open('schema_info') as db:
         try:
             old_data = db[db_name]
@@ -45,7 +46,8 @@ def save_information(db_name, schema_information):
                 if len(diff) > 0:
                     pp.pprint(diff)
         finally:
-            db[db_name] = schema_information
+            if overwrite:
+                db[db_name] = schema_information
 
 
 def get_schema_information(cur):
