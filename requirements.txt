@@ -1,2 +1,2 @@
-deepdiff==7.0.1
+deepdiff==8.0.0
 psycopg2==2.9.9
